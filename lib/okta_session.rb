@@ -27,11 +27,11 @@ class OktaSession
   end
 
   def get(path, opts = {})
-    session_request(:get, URI.join(service_url, path), opts)
+    session_request(:get, File.join(service_url, path), opts)
   end
 
   def post(path, opts = {})
-    session_request(:post, URI.join(service_url, path), opts)
+    session_request(:post, File.join(service_url, path), opts)
   end
 
   private
@@ -95,7 +95,7 @@ class OktaSession
       "#{OKTA_URL}/login/sessionCookieRedirect?" + URI.encode_www_form(
         'checkAccountSetupComplete' => true,
         'token' => session_token,
-        'redirectUrl' => URI.join(OKTA_URL, app_id)
+        'redirectUrl' => File.join(OKTA_URL, app_id)
       ),
       follow_redirects: false
     )
