@@ -7,5 +7,5 @@ Example
 
 ```ruby
 session = OktaSession.new(service_host: 'analytics.vinted.net', app_id: 'vinted_analyticssaml_2')
-session.get('https://analytics.vinted.net/status')
+session.get('cluster/status')
 ```
