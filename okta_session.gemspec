@@ -8,7 +8,6 @@ Gem::Specification.new do |s|
   s.files       = ['lib/okta_session.rb']
   s.homepage    =  'http://github.com/vinted/okta_session'
   s.add_dependency 'httparty'
-  s.add_dependency 'io/console'
   s.add_dependency 'nokogiri'
   s.add_dependency 'json'
 end
