@@ -34,6 +34,10 @@ class OktaSession
     session_request(:post, File.join(service_url, path), opts)
   end
 
+  def put(path, opts = {})
+    session_request(:put, File.join(service_url, path), opts)
+  end
+
   private
 
   def establish_session
