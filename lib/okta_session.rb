@@ -11,7 +11,7 @@ class OktaSession
   OKTA_URL = 'https://vinted.okta-emea.com'
   SESSION_CACHE = File.join(File.expand_path('~'), 'okta_session_cache')
 
-  FACTOR_METHOD = 'push'
+  FACTOR_METHOD = ENV['OKTA_FACTOR'] || 'push'
 
   def initialize(service_host:, app_id:)
     @service_host = service_host
@@ -82,7 +82,6 @@ class OktaSession
     when 'MFA_ENROLL'
       raise 'OKTA is not set up for your account! Please contact IT (#it slack channel)'
     when 'MFA_REQUIRED'
-      puts('Sending push notification...')
       handle_mfa(session_token(response['stateToken'], factor_id(response)))
     else
       raise "Unrecognized OKTA authn response status: `#{response['status']}`"
@@ -105,22 +104,55 @@ class OktaSession
     )
   end
 
-  def session_token(state_token, factor_id, try = 0)
-    response = session_request(
-      :post,
-      "#{OKTA_URL}/api/v1/authn/factors/#{factor_id}/verify",
-      headers: { 'Content-Type' => 'application/json' },
-      body: { 'stateToken' => state_token }.to_json
-    )
+  def push_factor(state_token, factor_id, try = 0)
+    response = factor_request(state_token, factor_id)
 
     if response['status'] == 'SUCCESS'
       response['sessionToken']
     elsif try < 10
       sleep 4
       puts 'polling for verification...'
-      session_token(state_token, factor_id, try + 1)
+      push_factor(state_token, factor_id, try + 1)
     else
       raise 'Failed authenticating to OKTA!'
+    end
+  end
+
+  def sms_factor(state_token, factor_id)
+    unless factor_request(state_token, factor_id)['status'] == 'MFA_CHALLENGE'
+      raise 'Failed sending verification SMS, please try again'
+    end
+
+    puts 'SMS verification code sent!'
+    print 'Enter code: '
+    code = $stdin.gets.chomp
+
+    response = factor_request(state_token, factor_id, { 'passCode' => code })
+    if response['status'] == 'SUCCESS'
+      response['sessionToken']
+    else
+      raise 'Failed verifying OKTA SMS code!'
+    end
+  end
+
+  def factor_request(state_token, factor_id, extra = {})
+    session_request(
+      :post,
+      "#{OKTA_URL}/api/v1/authn/factors/#{factor_id}/verify",
+      headers: { 'Content-Type' => 'application/json' },
+      body: { 'stateToken' => state_token }.merge(extra).to_json
+    )
+  end
+
+  def session_token(state_token, factor_id)
+    case FACTOR_METHOD
+    when 'push'
+      puts('Sending push notification...')
+      push_factor(state_token, factor_id)
+    when 'sms'
+      sms_factor(state_token, factor_id)
+    else
+      raise "OKTA login via #{FACTOR_METHOD} is unsupported!"
     end
   end
 
