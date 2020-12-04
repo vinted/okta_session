@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'okta_session'
-  s.version     = '0.2.0'
+  s.version     = '0.3.0'
   s.date        = '2020-06-12'
   s.summary     = 'A ruby library for Interacting with OKTA secured services via the command line'
   s.description = 'A ruby library for Interacting with OKTA secured services via the command line'
