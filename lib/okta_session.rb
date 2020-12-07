@@ -83,6 +83,8 @@ class OktaSession
       raise 'OKTA is not set up for your account! Please contact IT (#it slack channel)'
     when 'MFA_REQUIRED'
       handle_mfa(session_token(response['stateToken'], factor_id(response)))
+    when 'SUCCESS'
+      nil
     else
       raise "Unrecognized OKTA authn response status: `#{response['status']}`"
     end
