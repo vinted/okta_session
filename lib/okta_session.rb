@@ -84,7 +84,7 @@ class OktaSession
     when 'MFA_REQUIRED'
       handle_mfa(session_token(response['stateToken'], factor_id(response)))
     when 'SUCCESS'
-      nil
+      handle_mfa(response['sessionToken'])
     else
       raise "Unrecognized OKTA authn response status: `#{response['status']}`"
     end
