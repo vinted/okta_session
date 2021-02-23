@@ -86,7 +86,11 @@ class OktaSession
     when 'SUCCESS'
       handle_mfa(response['sessionToken'])
     else
-      raise "Unrecognized OKTA authn response status: `#{response['status']}`"
+      raise <<~MSG
+        Unrecognized OKTA authn response status: `#{response['status']}`
+        Full OKTA response:
+        #{response}
+      MSG
     end
   end
 
