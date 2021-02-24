@@ -96,6 +96,10 @@ class OktaSession
 
   def factor_id(response)
     response['_embedded']['factors'].find { |factor| factor['factorType'] == FACTOR_METHOD }['id']
+  rescue StandardError => e
+    puts e
+    puts response
+    raise
   end
 
   def handle_mfa(session_token)
