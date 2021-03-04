@@ -23,6 +23,7 @@ pipeline {
           agent {
               docker {
                   image 'ruby:2.7'
+                  args '-e BUNDLE_PATH=$WORKSPACE -e HOME=$WORKSPACE'
               }
           }
           stages {
