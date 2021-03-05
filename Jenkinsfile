@@ -6,6 +6,7 @@ pipeline {
         }
     }
     environment {
+        GIT_CREDENTIALS = credentials('github-jenkins-user')
         NEXUS_CREDENTIALS = credentials('nexus_backend_user')
         NEXUS_REPO_URL = 'https://nexus.vinted.net/repository/rubygems-hosted-backend'
     }
