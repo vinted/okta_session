@@ -69,7 +69,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    TAG=$(cat ./lib/version.rb | grep VERSION | sed "s/'//g" | awk '{ print "v"$3 }')
+                    TAG=$(cat ./lib/okta_session/version.rb | grep VERSION | sed "s/'//g" | awk '{ print "v"$3 }')
                     ORIGIN=$(echo $GIT_URL | sed 's+https://+https://'$GIT_CREDENTIALS'@+g')
                     git tag -f $TAG
                     git push $ORIGIN --tags

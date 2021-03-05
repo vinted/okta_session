@@ -14,7 +14,7 @@ class OktaSession
   FACTOR_METHOD = ENV['OKTA_FACTOR'] || 'push'
 
   def initialize(service_host:, app_id:)
-    @service_host = service_host
+    @service_host = service_hosts
     @service_url = "https://#{service_host}"
     @app_id = app_id
 
