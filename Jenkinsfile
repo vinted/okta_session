@@ -29,14 +29,6 @@ pipeline {
                 sh 'bundle install'
             }
         }
-        stage('Build protobuf') {
-            when {
-                branch 'master'
-            }
-            steps {
-                sh 'bundle exec rake generate_protobuf'
-            }
-        }
         stage('Build') {
             when {
                 branch 'master'
