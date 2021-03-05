@@ -1,8 +1,12 @@
 pipeline {
-    agent { label 'slave' }
+    agent {
+        docker {
+            image 'vinted/builder/ruby:2.7-1-c79a2fd'
+            args '-e BUNDLE_PATH=$WORKSPACE -e HOME=$WORKSPACE -e GIT_CREDENTIALS=$GIT_CREDENTIALS'
+        }
+    }
     environment {
         NEXUS_CREDENTIALS = credentials('nexus_backend_user')
-        GIT_CREDENTIALS = credentials('github-jenkins-user')
         NEXUS_REPO_URL = 'https://nexus.vinted.net/repository/rubygems-hosted-backend'
     }
     options {
@@ -19,47 +23,45 @@ pipeline {
         )
     }
     stages {
-        stage('Setup & Release') {
-          agent {
-              docker {
-                  image 'ruby:2.7'
-                  args '-e BUNDLE_PATH=$WORKSPACE -e HOME=$WORKSPACE'
-              }
-          }
-          stages {
-            stage('Setup') {
-                steps {
-                    sh 'gem install bundler:1.17.3'
-                    sh 'bundle install'
-                }
+        stage('Setup') {
+            steps {
+                sh 'gem install bundler:1.17.3'
+                sh 'bundle install'
             }
-            stage('Build') {
-                when {
-                    branch 'master'
-                }
-                steps {
-                    sh 'rm pkg/* || true'
-                    sh 'bundle exec rake build'
-                }
+        }
+        stage('Build protobuf') {
+            when {
+                branch 'master'
             }
-            stage('Release') {
-                when {
-                    branch 'master'
-                }
-                steps {
-                    sh 'gem install nexus'
-                    sh 'gem nexus --url $NEXUS_REPO_URL --credential $NEXUS_CREDENTIALS pkg/*'
-                }
-                post {
-                    failure {
-                        script {
-                            currentBuild.result='UNSTABLE'
-                        }
-                        error('Gem release to nexus failed.')
+            steps {
+                sh 'bundle exec rake generate_protobuf'
+            }
+        }
+        stage('Build') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh 'rm pkg/* || true'
+                sh 'bundle exec rake build'
+            }
+        }
+        stage('Release') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh 'gem install nexus'
+                sh 'gem nexus --url $NEXUS_REPO_URL --credential $NEXUS_CREDENTIALS pkg/*'
+            }
+            post {
+                failure {
+                    script {
+                        currentBuild.result='UNSTABLE'
                     }
+                    error('Gem release to nexus failed.')
                 }
             }
-          }
         }
         stage('Tag release') {
             when {
